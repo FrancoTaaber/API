@@ -1,5 +1,38 @@
 const photos = require('../models/photo');
 
+const addPhotoWS = (photo, callback) => {
+    const newPhoto = {
+        id: photos.length + 1,
+        title: photo.title,
+        url: photo.url,
+    };
+
+    photos.push(newPhoto);
+    callback(newPhoto);
+};
+
+const updatePhotoWS = (id, title, url, callback) => {
+    const photoIndex = photos.findIndex((photo) => photo.id === id);
+
+    if (photoIndex === -1) {
+        return;
+    }
+
+    photos[photoIndex] = { id, title, url };
+    callback(photos[photoIndex]);
+};
+
+const deletePhotoWS = (id, callback) => {
+    const photoIndex = photos.findIndex((photo) => photo.id === id);
+
+    if (photoIndex === -1) {
+        return;
+    }
+
+    photos.splice(photoIndex, 1);
+    callback(id);
+};
+
 exports.getPhotos = (req, res) => {
     res.status(200).json(photos);
 };
@@ -17,37 +50,34 @@ exports.getPhotoById = (req, res) => {
 
 exports.addPhoto = (req, res) => {
     const { title, url } = req.body;
-    const newPhoto = {
-        id: photos.length + 1,
-        title,
-        url,
-    };
-
-    photos.push(newPhoto);
-    res.status(201).json(newPhoto);
+    addPhotoWS({ title, url }, (newPhoto) => {
+        req.app.io.emit('photoAdded', newPhoto);
+        res.status(201).json(newPhoto);
+    });
 };
 
 exports.updatePhoto = (req, res) => {
     const id = parseInt(req.params.id, 10);
     const { title, url } = req.body;
-    const photoIndex = photos.findIndex((photo) => photo.id === id);
+    updatePhotoWS(id, title, url, (updatedPhoto) => {
+        if (!updatedPhoto) {
+            return res.status(404).json({ message: 'Photo not found' });
+        }
 
-    if (photoIndex === -1) {
-        return res.status(404).json({ message: 'Photo not found' });
-    }
-
-    photos[photoIndex] = { id, title, url };
-    res.status(200).json(photos[photoIndex]);
+        req.app.io.emit('photoUpdated', updatedPhoto);
+        res.status(200).json(updatedPhoto);
+    });
 };
 
 exports.deletePhoto = (req, res) => {
     const id = parseInt(req.params.id, 10);
-    const photoIndex = photos.findIndex((photo) => photo.id === id);
+    deletePhotoWS(id, (deletedId) => {
+        if (!deletedId) {
+            return res.status(404).json({ message: 'Photo not found' });
+        }
 
-    if (photoIndex === -1) {
-        return res.status(404).json({ message: 'Photo not found' });
-    }
-
-    photos.splice(photoIndex, 1);
-    res.status(200).json({ message: 'Photo deleted successfully' });
+        req.app.io.emit('photoDeleted', deletedId);
+        res.status(200).json({ message: 'Photo deleted successfully' });
+    });
 };
+
