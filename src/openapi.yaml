@@ -18,6 +18,21 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Photo'
+    post:
+      summary: Add a new photo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Photo'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Photo'
   /photos/{id}:
     put:
       summary: Update a photo
