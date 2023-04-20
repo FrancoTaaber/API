@@ -7,7 +7,13 @@ const { Server } = require("socket.io");
 
 const app = express();
 const server = createServer(app);
-const io = new Server(server);
+const io = new Server(server, {
+    cors: {
+        origin: "http://localhost:3000", // Only allow requests from this origin
+        methods: ["GET", "POST", "PUT", "DELETE"],
+        allowedHeaders: ["Content-Type"],
+    },
+});
 
 app.use(bodyParser.json());
 app.use(cors());
