@@ -1,0 +1,8 @@
+timestamp;level;message
+2023-04-20T14:15:20.956Z;info;Deleted photo with id: 1
+2023-04-20T14:20:29.872Z;info;Deleted photo with id: 1
+2023-04-20T14:20:29.875Z;info;Deleted photo with id: 1
+2023-04-20T14:35:50.062Z;info;Deleted photo with id: 1
+2023-04-20T14:40:23.900Z;info;Deleted photo with id: 1
+2023-04-20T14:40:30.863Z;info;Added photo with id: 3
+2023-04-20T14:42:07.565Z;info;Updated photo with id: 2

@@ -1,8 +1,10 @@
 const photos = require('../models/photo');
 
+
 const addPhotoWS = (photo, callback) => {
+    const maxId = Math.max(...photos.map((p) => p.id));
     const newPhoto = {
-        id: photos.length + 1,
+        id: maxId === -Infinity ? 1 : maxId + 1,
         title: photo.title,
         url: photo.url,
     };
@@ -48,13 +50,15 @@ exports.getPhotoById = (req, res) => {
     res.status(200).json(photo);
 };
 
-exports.addPhoto = (req, res) => {
+exports.addPhoto = (req, res, callback) => {
     const { title, url } = req.body;
     addPhotoWS({ title, url }, (newPhoto) => {
         req.app.io.emit('photoAdded', newPhoto);
         res.status(201).json(newPhoto);
+        callback(newPhoto);
     });
 };
+
 
 exports.updatePhoto = (req, res) => {
     const id = parseInt(req.params.id, 10);
