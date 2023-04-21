@@ -70,9 +70,7 @@ exports.updatePhoto = (req, res, userId) => {
     const id = parseInt(req.params.id, 10);
     const { title, url } = req.body;
     const photoIndex = photos.findIndex((photo) => photo.id === id);
-
-    console.log("User ID:", userId);
-    console.log("Photo owner ID:", photos[photoIndex].userId);
+    
 
     if (photoIndex === -1) {
         res.status(404).json({ message: 'Photo not found' });
