@@ -9,6 +9,15 @@ const fs = require("fs");
 const authMiddleware = require("./auth");
 const jwt = require("jsonwebtoken");
 const config = require("./config");
+const rateLimit = require("express-rate-limit");
+
+
+const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100,
+    message: "Too many requests from this IP, please try again after 15 minutes."
+});
+
 
 // Dummy kasutaja, kontrollige tegelike kasutajate vastu oma andmebaasis
 const dummyUsers = [
@@ -38,6 +47,9 @@ const io = new Server(server, {
 
 app.use(bodyParser.json());
 app.use(cors());
+app.use("/photos", apiLimiter);
+app.use("/login", apiLimiter);
+
 
 // API routes
 app.get("/photos", photoController.getPhotos);

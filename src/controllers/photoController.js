@@ -1,5 +1,9 @@
 const photos = require('../models/photo');
 
+const getIP = (req) => {
+    const ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
+    return ip;
+};
 
 const addPhotoWS = (userId, photo, callback) => {
     const maxId = Math.max(...photos.map((p) => p.id));
@@ -70,7 +74,7 @@ exports.updatePhoto = (req, res, userId) => {
     const id = parseInt(req.params.id, 10);
     const { title, url } = req.body;
     const photoIndex = photos.findIndex((photo) => photo.id === id);
-    
+
 
     if (photoIndex === -1) {
         res.status(404).json({ message: 'Photo not found' });
