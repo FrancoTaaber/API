@@ -1,10 +1,11 @@
 const photos = require('../models/photo');
 
 
-const addPhotoWS = (photo, callback) => {
+const addPhotoWS = (userId, photo, callback) => {
     const maxId = Math.max(...photos.map((p) => p.id));
     const newPhoto = {
         id: maxId === -Infinity ? 1 : maxId + 1,
+        userId: userId,
         title: photo.title,
         url: photo.url,
     };
@@ -50,38 +51,54 @@ exports.getPhotoById = (req, res) => {
     res.status(200).json(photo);
 };
 
-exports.addPhoto = (req, res, callback) => {
+exports.addPhoto = (req, res, userId, callback) => {
     const { title, url } = req.body;
-    addPhotoWS({ title, url }, (newPhoto) => {
-        req.app.io.emit('photoAdded', newPhoto);
-        res.status(201).json(newPhoto);
-        callback(newPhoto);
-    });
+    const id = Math.max(...photos.map((p) => p.id));
+    const newPhoto = {
+        id: id === -Infinity ? 1 : id + 1,
+        title: title,
+        url: url,
+        userId: userId,
+    };
+    photos.push(newPhoto);
+    req.app.io.emit('photoAdded', newPhoto);
+    res.status(201).json(newPhoto);
+    callback(newPhoto);
+};
+
+exports.updatePhoto = (req, res, userId) => {
+    const id = parseInt(req.params.id, 10);
+    const { title, url } = req.body;
+    const photoIndex = photos.findIndex((photo) => photo.id === id);
+
+    console.log("User ID:", userId);
+    console.log("Photo owner ID:", photos[photoIndex].userId);
+
+    if (photoIndex === -1) {
+        res.status(404).json({ message: 'Photo not found' });
+    } else if (photos[photoIndex].userId !== userId) {
+        res.status(403).json({ error: "Not authorized to update this photo" });
+    } else {
+        photos[photoIndex] = { id, title, url, userId: photos[photoIndex].userId };
+        req.app.io.emit('photoUpdated', photos[photoIndex]);
+        res.status(200).json(photos[photoIndex]);
+    }
 };
 
 
-exports.updatePhoto = (req, res) => {
+exports.deletePhoto = (req, res, userId) => {
     const id = parseInt(req.params.id, 10);
-    const { title, url } = req.body;
-    updatePhotoWS(id, title, url, (updatedPhoto) => {
-        if (!updatedPhoto) {
-            return res.status(404).json({ message: 'Photo not found' });
-        }
+    const photoIndex = photos.findIndex((photo) => photo.id === id);
 
-        req.app.io.emit('photoUpdated', updatedPhoto);
-        res.status(200).json(updatedPhoto);
-    });
-};
-
-exports.deletePhoto = (req, res) => {
-    const id = parseInt(req.params.id, 10);
-    deletePhotoWS(id, (deletedId) => {
-        if (!deletedId) {
-            return res.status(404).json({ message: 'Photo not found' });
-        }
-
+    if (photoIndex === -1) {
+        res.status(404).json({ message: 'Photo not found' });
+    } else if (photos[photoIndex].userId !== userId) {
+        res.status(403).json({ error: "Not authorized to delete this photo" });
+    } else {
+        const deletedId = photos[photoIndex].id;
+        photos.splice(photoIndex, 1);
         req.app.io.emit('photoDeleted', deletedId);
         res.status(200).json({ message: 'Photo deleted successfully' });
-    });
+    }
 };
 

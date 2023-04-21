@@ -11,11 +11,18 @@ const jwt = require("jsonwebtoken");
 const config = require("./config");
 
 // Dummy kasutaja, kontrollige tegelike kasutajate vastu oma andmebaasis
-const dummyUser = {
-    id: 1,
-    email: "test@example.com",
-    password: "password",
-};
+const dummyUsers = [
+    {
+        id: 1,
+        email: "test@example.com",
+        password: "password",
+    },
+    {
+        id: 2,
+        email: "another@example.com",
+        password: "anotherpassword",
+    },
+];
 
 
 
@@ -36,17 +43,21 @@ app.use(cors());
 app.get("/photos", photoController.getPhotos);
 app.get("/photos/:id", photoController.getPhotoById);
 app.post("/photos", authMiddleware, (req, res) => {
-    photoController.addPhoto(req, res, (newPhoto) => {
+    const userId = req.user.id;
+    photoController.addPhoto(req, res, userId, (newPhoto) => {
         logger.info(`Added photo with id: ${newPhoto.id}`);
     });
 });
 
 app.put("/photos/:id", authMiddleware, (req, res) => {
-    photoController.updatePhoto(req, res);
+    const userId = req.user.id;
+    photoController.updatePhoto(req, res, userId);
     logger.info(`Updated photo with id: ${req.params.id}`);
 });
+
 app.delete("/photos/:id", authMiddleware, (req, res) => {
-    photoController.deletePhoto(req, res);
+    const userId = req.user.id;
+    photoController.deletePhoto(req, res, userId);
     logger.info(`Deleted photo with id: ${req.params.id}`);
 });
 
@@ -65,9 +76,13 @@ app.post("/login", (req, res) => {
     const { email, password } = req.body;
 
     // Kontrollige kasutajat andmebaasis
-    if (email === dummyUser.email && password === dummyUser.password) {
+    const user = dummyUsers.find(
+        (u) => u.email === email && u.password === password
+    );
+
+    if (user) {
         // Genereerige JWT
-        const token = jwt.sign({ id: dummyUser.id }, config.jwtSecret, {
+        const token = jwt.sign({ id: user.id }, config.jwtSecret, {
             expiresIn: "1h",
         });
         res.json({ token });
