@@ -84,3 +84,30 @@ API-logide vaatamiseks CSV-failina tehke päring järgmiselt:
 - Meetod: GET
 - URL: /logs
 
+## Litsents
+See projekt on litsentseeritud MIT litsentsi alusel.
+
+## Failide struktuur
+server.js
+See fail sisaldab serveri konfiguratsiooni ja käivitamise koodi. See loob Expressi rakenduse, määrab API marsruudid ja käivitab HTTP-serveri koos Socket.IO-ga.
+
+photo.js
+See fail sisaldab foto mudelit, mis on lihtne JSON-objektide massiiv. Mudelit saab asendada andmebaasiühendusega.
+
+photoController.js
+See fail sisaldab kõiki API-ühenduspunkte foto lisamiseks, värskendamiseks, kustutamiseks ja lugemiseks. Lisaks sisaldab see WebSocket funktsioone fotode reaalajas värskendamiseks.
+
+api.test.js
+See fail sisaldab API testide komplekti, mis kasutavad Chai ja Chai-HTTP teeki.
+
+logs.csv
+See fail sisaldab logisid, mis salvestatakse serveri töö ajal.
+
+logger.js
+See fail sisaldab logimise seadistust ja funktsioone. See kasutab Winstoni teeki logide salvestamiseks.
+
+config.js
+See fail sisaldab JWT saladuse konfiguratsiooni.
+
+auth.js
+See fail sisaldab JWT autentimise konfiguratsiooni ja funktsioone, kasutades Passport.js teeki.
