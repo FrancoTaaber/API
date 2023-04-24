@@ -11,7 +11,7 @@ const jwt = require("jsonwebtoken");
 const config = require("./config");
 const rateLimit = require("express-rate-limit");
 
-
+// Configure rate limiting
 const apiLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
     max: 100,
@@ -19,7 +19,7 @@ const apiLimiter = rateLimit({
 });
 
 
-// Dummy kasutaja, kontrollige tegelike kasutajate vastu oma andmebaasis
+// Dummy users for testing purposes
 const dummyUsers = [
     {
         id: 1,
@@ -34,7 +34,7 @@ const dummyUsers = [
 ];
 
 
-
+// Set up the Express app and socket.io server
 const app = express();
 const server = createServer(app);
 const io = new Server(server, {
@@ -45,6 +45,7 @@ const io = new Server(server, {
     },
 });
 
+// Middleware configuration
 app.use(bodyParser.json());
 app.use(cors());
 app.use("/photos", apiLimiter);
@@ -73,6 +74,7 @@ app.delete("/photos/:id", authMiddleware, (req, res) => {
     logger.info(`Deleted photo with id: ${req.params.id}`);
 });
 
+// Route for getting log files
 app.get("/logs", (req, res) => {
     fs.readFile("logs.csv", "utf8", (err, data) => {
         if (err) {
@@ -84,16 +86,14 @@ app.get("/logs", (req, res) => {
         }
     });
 });
+
+// Route for handling login
 app.post("/login", (req, res) => {
     const { email, password } = req.body;
-
-    // Kontrollige kasutajat andmebaasis
     const user = dummyUsers.find(
         (u) => u.email === email && u.password === password
     );
-
     if (user) {
-        // Genereerige JWT
         const token = jwt.sign({ id: user.id }, config.jwtSecret, {
             expiresIn: "1h",
         });
@@ -103,8 +103,10 @@ app.post("/login", (req, res) => {
     }
 });
 
+// Attach the socket.io server to the app
 app.io = io;
 
+// Start the server
 server.listen(3001, () => {
     console.log("Server is running on port 3001");
 });

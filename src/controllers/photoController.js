@@ -1,10 +1,12 @@
 const photos = require('../models/photo');
 
+// Helper function to get client IP
 const getIP = (req) => {
     const ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
     return ip;
 };
 
+// WebSocket: Add photo
 const addPhotoWS = (userId, photo, callback) => {
     const maxId = Math.max(...photos.map((p) => p.id));
     const newPhoto = {
@@ -18,6 +20,7 @@ const addPhotoWS = (userId, photo, callback) => {
     callback(newPhoto);
 };
 
+// WebSocket: Update photo
 const updatePhotoWS = (id, title, url, callback) => {
     const photoIndex = photos.findIndex((photo) => photo.id === id);
 
@@ -29,6 +32,7 @@ const updatePhotoWS = (id, title, url, callback) => {
     callback(photos[photoIndex]);
 };
 
+// WebSocket: Delete photo
 const deletePhotoWS = (id, callback) => {
     const photoIndex = photos.findIndex((photo) => photo.id === id);
 
@@ -40,10 +44,12 @@ const deletePhotoWS = (id, callback) => {
     callback(id);
 };
 
+// REST: Get all photos
 exports.getPhotos = (req, res) => {
     res.status(200).json(photos);
 };
 
+// REST: Get photo by ID
 exports.getPhotoById = (req, res) => {
     const id = parseInt(req.params.id, 10);
     const photo = photos.find((photo) => photo.id === id);
@@ -55,6 +61,7 @@ exports.getPhotoById = (req, res) => {
     res.status(200).json(photo);
 };
 
+// REST: Add a new photo
 exports.addPhoto = (req, res, userId, callback) => {
     const { title, url } = req.body;
     const id = Math.max(...photos.map((p) => p.id));
@@ -70,6 +77,7 @@ exports.addPhoto = (req, res, userId, callback) => {
     callback(newPhoto);
 };
 
+// REST: Update an existing photo
 exports.updatePhoto = (req, res, userId) => {
     const id = parseInt(req.params.id, 10);
     const { title, url } = req.body;
@@ -87,7 +95,7 @@ exports.updatePhoto = (req, res, userId) => {
     }
 };
 
-
+// REST: Delete a photo
 exports.deletePhoto = (req, res, userId) => {
     const id = parseInt(req.params.id, 10);
     const photoIndex = photos.findIndex((photo) => photo.id === id);
