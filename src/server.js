@@ -10,6 +10,11 @@ const authMiddleware = require("./auth");
 const jwt = require("jsonwebtoken");
 const config = require("./config");
 const rateLimit = require("express-rate-limit");
+const swaggerUi = require('swagger-ui-express');
+const YAML = require('yamljs');
+const openApiDocumentation = YAML.load('./openapi.yaml');
+
+
 
 // Configure rate limiting
 const apiLimiter = rateLimit({
@@ -102,6 +107,9 @@ app.post("/tokens", (req, res) => {
         res.status(401).json({ error: "Invalid email or password" });
     }
 });
+
+// Serve Swagger UI at the /docs endpoint
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(openApiDocumentation));
 
 // Attach the socket.io server to the app
 app.io = io;
