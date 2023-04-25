@@ -49,7 +49,7 @@ const io = new Server(server, {
 app.use(bodyParser.json());
 app.use(cors());
 app.use("/photos", apiLimiter);
-app.use("/login", apiLimiter);
+app.use("/tokens", apiLimiter);
 
 
 // API routes
@@ -88,7 +88,7 @@ app.get("/logs", (req, res) => {
 });
 
 // Route for handling login
-app.post("/login", (req, res) => {
+app.post("/tokens", (req, res) => {
     const { email, password } = req.body;
     const user = dummyUsers.find(
         (u) => u.email === email && u.password === password

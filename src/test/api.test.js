@@ -8,7 +8,7 @@ chai.use(chaiHttp);
 const loginUser = async () => {
     const res = await chai
         .request(server)
-        .post("/login")
+        .post("/tokens")
         .send({ email: "test@example.com", password: "password" });
     return res.body.token;
 };
